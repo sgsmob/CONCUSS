@@ -206,6 +206,22 @@ class Coloring(object):
 
         return (coloring_from_pickle, (lst,))
 
+    def write(self, filename):
+        with open(filename, 'w') as f:
+            f.write(str(num) + '\n')
+            for v in self:
+                f.write("{0}: {1} \n".format(v, self[v]))
+
+    @classmethod
+    def read_coloring(cls, filename):
+        coloring = cls()
+        with open(filename, 'r') as f:
+            f.readline()
+            for line in f:
+                vertex, color = line.split(": ")
+                coloring[int(vertex)] = int(color)
+        return coloring
+
 
 def coloring_from_pickle(lst):
     """ Load a coloring from pickle """
