@@ -265,7 +265,10 @@ def runPipeline(graph, pattern, cfgFile, colorFile, color_no_verify, output,
     # Find p-centered coloring
     if colorFile is None:
         coloring = p_centered_coloring(G, td, cfgFile, verbose, execdata)
-        save_file(coloring, 'colorings/' + G_name + str(td), False, verbose)
+        # store coloring in output file
+        if output is None:
+            output = 'colorings/' + G_name + str(td)
+        save_file(coloring, output, False, verbose)
     else:
         coloring = coloring_from_file(colorFile, G, td, cfgFile, verbose,
                                       not color_no_verify)
