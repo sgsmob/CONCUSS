@@ -263,8 +263,11 @@ def start_coloring(filename, td, cfgfile, output):
     p, fn = os.path.split(filename)
     graphname, e = os.path.splitext(fn)
 
+    prof = cProfile.Profile()
+    prof.enable()
     col = m.start(load_graph(filename), td)
-
+    prof.disable()
+    printProfileStats("colorings", prof)
     # Store results in common folder and, if supplied, in output file
     save_file(col, 'colorings/' + graphname + str(td), False)
     if output:
