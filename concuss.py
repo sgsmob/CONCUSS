@@ -28,7 +28,7 @@ def main():
     parser.add_argument("config",
                         help="filename of the configuration settings",
                         nargs='?', type=str, default='config/default.cfg')
-    parser.add_argument("-o", "--output", help="filename of the result",
+    parser.add_argument("-o", "--output", help="filename of the resulting coloring",
                         type=str, nargs='?', default=None)
     parser.add_argument("-v", "--verbose", help="verbose output",
                         action="store_true")
