@@ -269,7 +269,7 @@ def start_coloring(filename, td, cfgfile, output):
     prof.disable()
     printProfileStats("colorings", prof)
     # Store results in common folder and, if supplied, in output file
-    save_file(col, 'colorings/' + graphname + str(td), False)
+    #save_file(col, 'colorings/' + graphname + str(td), False)
     if output:
         save_file(col, output, True)
 
