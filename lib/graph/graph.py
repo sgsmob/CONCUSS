@@ -208,7 +208,7 @@ class Coloring(object):
 
     def write(self, filename):
         with open(filename, 'w') as f:
-            f.write(str(num) + '\n')
+            f.write(str(len(self)) + '\n')
             for v in self:
                 f.write("{0}: {1} \n".format(v, self[v]))
 
