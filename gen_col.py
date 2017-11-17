@@ -11,7 +11,7 @@ import os
 import argparse
 import cProfile
 import pstats
-
+from string import Template
 from lib.coloring.generate_coloring import start_coloring
 
 
@@ -25,7 +25,7 @@ if __name__ == '__main__':
                         type=str, nargs='?', default=None)
     parser.add_argument("-i", "--intermediate",
                         help="filename of intermediate colorings",
-                        type=str, nargs='?', default=None)
+                        type=Template, nargs='?', default=None)
     args = parser.parse_args()
 
     start_coloring(args.graph, args.treeDepth, args.config, args.output,
