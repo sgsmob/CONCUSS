@@ -41,7 +41,19 @@ def same_color(cols, vertices, c):
     return True
     #return all(cols[v] == c for v in vertices)
 
-def merge_colors(graph, cols, p):
+
+def write_intermediate(color_sets, fname):
+    # ensure the final coloring has no unused colors
+    c_idx = 0
+    final_coloring = Coloring()
+    for v_set in color_sets:
+        if len(v_set) > 0:
+            recolor(final_coloring, v_set, c_idx)
+            c_idx += 1
+    final_coloring.write(fname)
+
+
+def merge_colors(graph, cols, p, intermediate=None):
     # order the coloring by frequency
     ordered_col = cols.normalize()
 
@@ -50,6 +62,7 @@ def merge_colors(graph, cols, p):
     for v in graph:
         color_sets[ordered_col[v]].add(v)
     num_colors = len(ordered_col)
+    num_changed = 0
     echo(len(ordered_col))
     # iterate through all colors
     for c1 in range(num_colors):
@@ -61,8 +74,8 @@ def merge_colors(graph, cols, p):
             continue
         echo("\n", c1, c1_vertices)
         # otherwise iterate through all colors with fewer vertices
-        
-        for c2 in range(c1+1,num_colors):
+
+        for c2 in range(c1+1, num_colors):
             # vertices with color c2
             c2_vertices = color_sets[c2]
 
@@ -72,25 +85,26 @@ def merge_colors(graph, cols, p):
             echo("\t", c2, c2_vertices)
             # check whether c1 and c2 together form an independent set
             if independent_colors(graph, c1_vertices, c2_vertices):
-                 # temporarily color all c2 vertices with c1
-                 recolor(ordered_col, c2_vertices, c1)
-                 echo("\t\t",list(ordered_col[v] for v in c2_vertices))
-                 #assert same_color(ordered_col, c2_vertices, c1)
-                 #assert same_color(ordered_col, c1_vertices, c1)
-                 # check if merge would be p-centered
-                 is_p_centered, _ = check_tree_depth(graph, graph, ordered_col,
-                                                     p)
-                 echo("\t\t", is_p_centered, _)
-                 if is_p_centered:
-                     # merge the vertices of c2 into c1
-                     c1_vertices |= c2_vertices
-                     c2_vertices.clear()
-                     echo("\t\tNew c1:", c1_vertices)
-                 else:
-                     # restore the c2 vertices to their original color
-                     echo("\t\tNot", p+1, "centered")
-                     recolor(ordered_col, c2_vertices, c2)
-                     #assert same_color(ordered_col, c2_vertices, c2)
+                # temporarily color all c2 vertices with c1
+                recolor(ordered_col, c2_vertices, c1)
+                echo("\t\t", list(ordered_col[v] for v in c2_vertices))
+                # check if merge would be p-centered
+                is_p_centered, _ = check_tree_depth(graph, graph, ordered_col,
+                                                    p)
+                echo("\t\t", is_p_centered, _)
+                if is_p_centered:
+                    # merge the vertices of c2 into c1
+                    c1_vertices |= c2_vertices
+                    c2_vertices.clear()
+                    echo("\t\tNew c1:", c1_vertices)
+                    num_changed += 1
+                    if intermediate and num_changed % 20 == 0:
+                        fname = intermediate.substitute(num_colors-num_changed)
+                        write_intermediate(color_sets, fname)
+                else:
+                    # restore the c2 vertices to their original color
+                    echo("\t\tNot", p+1, "centered")
+                    recolor(ordered_col, c2_vertices, c2)
             else:
                 echo("\t\tDependent")
     # ensure the final coloring has no unused colors
@@ -104,7 +118,7 @@ def merge_colors(graph, cols, p):
         else:
             echo("skipped")
     return final_coloring
-    
+
 
 def write_coloring(cols, output):
     print "Writing result to {0}".format(output)

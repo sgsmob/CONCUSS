@@ -37,7 +37,7 @@ def save_file(col, filename, override=False, verbose=False):
                         print ")"
         else:
             override = True
-            if verbose: 
+            if verbose:
                 print "there is still no coloring, create result"
 
     if override:
@@ -107,7 +107,7 @@ class CCAlgorithm(object):
         if not self.silent:
             print " ".join(map(str, msg))
 
-    def start(self, rawgraph, treeDepth):
+    def start(self, rawgraph, treeDepth, intermediate):
         self.td = treeDepth
 
         col = Coloring()
@@ -123,7 +123,7 @@ class CCAlgorithm(object):
             pp_graph, postprocess = self.preprocess(rawgraph)
             if self.profile:
                 preProfile.disable()
-                printProfileStats( "preprocessing", preProfile)
+                printProfileStats("preprocessing", preProfile)
 
         # Normalize graph so that its vertices are named 0, ..., n-1
         pp_graph.remove_loops()
@@ -201,13 +201,12 @@ class CCAlgorithm(object):
             self.echo("number of colors:", len(col))
             if self.profile:
                 optProfile.disable()
-                printProfileStats( "optimizing", optProfile)
+                printProfileStats("optimizing", optProfile)
 
         # Map coloring back to original vertex labels
         colrenamed = Coloring()
         for v in col:
             colrenamed[mapping[v]] = col[v]
-
 
         if self.preprocess:
             if self.profile:
@@ -225,7 +224,8 @@ class CCAlgorithm(object):
             mergeProfile = cProfile.Profile()
             mergeProfile.enable()
         self.echo("Merging color classes")
-        col_merged = merge_colors(rawgraph, col_restored, treeDepth)
+        col_merged = merge_colors(rawgraph, col_restored, treeDepth,
+                                  intermediate)
         self.echo("number of colors:", len(col_merged))
 
         if self.execdata:
@@ -257,7 +257,7 @@ class CCAlgorithm(object):
         return col_merged
 
 
-def start_coloring(filename, td, cfgfile, output):
+def start_coloring(filename, td, cfgfile, output, intermediate):
     m = ccalgorithm_factory(cfgfile, False, None)
 
     p, fn = os.path.split(filename)
@@ -265,7 +265,7 @@ def start_coloring(filename, td, cfgfile, output):
 
     prof = cProfile.Profile()
     prof.enable()
-    col = m.start(load_graph(filename), td)
+    col = m.start(load_graph(filename), td, intermediate)
     prof.disable()
     printProfileStats("colorings", prof)
     # Store results in common folder and, if supplied, in output file
@@ -300,6 +300,10 @@ if __name__ == '__main__':
                         nargs='?', default='config/default.cfg')
     parser.add_argument("-o", "--output", help="filename of the result",
                         type=str, nargs='?', default=None)
+    parser.add_argument("-i", "--intermediate",
+                        help="filename of intermediate colorings",
+                        type=str, nargs='?', default=None)
     args = parser.parse_args()
 
-    start_coloring(args.graph, args.treeDepth, args.config, args.output)
+    start_coloring(args.graph, args.treeDepth, args.config, args.output,
+                   args.intermediate)

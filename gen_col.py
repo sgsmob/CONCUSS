@@ -23,6 +23,10 @@ if __name__ == '__main__':
                         nargs='?', default='config/default.cfg')
     parser.add_argument("-o", "--output", help="filename of the result",
                         type=str, nargs='?', default=None)
+    parser.add_argument("-i", "--intermediate",
+                        help="filename of intermediate colorings",
+                        type=str, nargs='?', default=None)
     args = parser.parse_args()
 
-    start_coloring(args.graph, args.treeDepth, args.config, args.output)
+    start_coloring(args.graph, args.treeDepth, args.config, args.output,
+                   args.intermediate)
