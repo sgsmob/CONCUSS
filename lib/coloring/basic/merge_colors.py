@@ -99,7 +99,8 @@ def merge_colors(graph, cols, p, intermediate=None):
                     echo("\t\tNew c1:", c1_vertices)
                     num_changed += 1
                     if intermediate and num_changed % 20 == 0:
-                        fname = intermediate.substitute(num_colors-num_changed)
+                        curr_size = num_colors-num_changed
+                        fname = intermediate.substitute(size=curr_size)
                         write_intermediate(color_sets, fname)
                 else:
                     # restore the c2 vertices to their original color
