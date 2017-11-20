@@ -32,6 +32,10 @@ def count_large_treedepth(G, H, coloring, p, td_lower):
 
     return counter.count_patterns()[0]
 
+
+def null_function(*args):
+    pass
+
     
 def count_depths(G, H, coloring, p, td_lower):
     gen = DFSSweep(G,
@@ -39,8 +43,8 @@ def count_depths(G, H, coloring, p, td_lower):
                    p,
                    td_lower,
                    len(H),
-                   [lambda x: pass],
-                   [lambda x: pass])
+                   [null_function],
+                   [null_function])
     total_depths = 0
     total_v = 0
     for decomp in gen:
