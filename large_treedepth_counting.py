@@ -3,6 +3,7 @@
 
 import cProfile
 import argparse
+from collections import deque
 from lib.pattern_counting.dp import MemoizedBVKPattern
 from lib.pattern_counting.double_count import InclusionExclusion
 from lib.decomposition import DFSSweep
@@ -60,6 +61,7 @@ def count_depths(G, H, coloring, p, td_lower):
                 q.extend(reversed(decomp.children(curr)))
         ordering.reverse()
         num_colors = set(coloring[v] for v in q)
+        print num_colors
 
         if len(num_colors) == p:
             depths = [v.depth for v in ordering]
@@ -77,7 +79,7 @@ if __name__ == "__main__":
     parser.add_argument("coloring", type=str, help="Coloring file")
     parser.add_argument("p", type=int,
                         help="Maximum numbers to consider in decomposition")
-    parser.add_argument("-d", "--depth_only", action=set_true,
+    parser.add_argument("-d", "--depth_only", action='store_true',
                         help="average the depths of all vertices")
     args = parser.parse_args()
     G = load_graph(args.graph)
