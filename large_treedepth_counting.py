@@ -32,6 +32,36 @@ def count_large_treedepth(G, H, coloring, p, td_lower):
 
     return counter.count_patterns()[0]
 
+    
+def count_depths(G, H, coloring, p, td_lower):
+    gen = DFSSweep(G,
+                   coloring,
+                   p,
+                   td_lower,
+                   len(H),
+                   [lambda x: pass],
+                   [lambda x: pass])
+    total_depths = 0
+    total_v = 0
+    for decomp in gen:
+        # create a post order traversal ordering with a DFS to use in the DP
+        ordering = []
+        q = deque([decomp.root])
+        # print decomp.root, len(decomp),
+        # print [(i+1,self.coloring[i]) for i in decomp]
+        while q:
+            curr = q.pop()
+            ordering.append(curr)
+            if not decomp.hasLeaf(curr):
+                q.extend(reversed(decomp.children(curr)))
+        ordering.reverse()
+
+        depths = [v.depth for v in ordering]
+        total_depths += sum(depths)
+        total_v += len(depths)
+
+    print "Average depth in TDDs", float(total_depths) / total_v
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -41,18 +71,22 @@ if __name__ == "__main__":
     parser.add_argument("coloring", type=str, help="Coloring file")
     parser.add_argument("p", type=int,
                         help="Maximum numbers to consider in decomposition")
+    parser.add_argument("-d", "--depth_only", action=set_true,
+                        help="average the depths of all vertices")
     args = parser.parse_args()
     G = load_graph(args.graph)
     coloring = coloring_from_file(args.coloring, None, None, None, None)
     H, td_lower = get_pattern_from_generator(args.pattern)
     p = args.p
 
-    prof = cProfile.Profile()
-    prof.enable()
-    count = count_large_treedepth(G, H, coloring, p, td_lower)
-    prof.disable()
+    count_depths(G, H, coloring, p, td_lower)
+    if not args.depth_only:
+        prof = cProfile.Profile()
+        prof.enable()
+        count = count_large_treedepth(G, H, coloring, p, td_lower)
+        prof.disable()
 
-    print "Number of occurrences of H in G: {}".format(count)
+        print "Number of occurrences of H in G: {}".format(count)
 
-    name = "{} {}".format(args.graph, args.coloring)
-    printProfileStats(name, prof)
+        name = "{} {}".format(args.graph, args.coloring)
+        printProfileStats(name, prof)
