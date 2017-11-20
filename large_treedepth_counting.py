@@ -55,10 +55,12 @@ def count_depths(G, H, coloring, p, td_lower):
             if not decomp.hasLeaf(curr):
                 q.extend(reversed(decomp.children(curr)))
         ordering.reverse()
+        num_colors = set(coloring[v] for v in q)
 
-        depths = [v.depth for v in ordering]
-        total_depths += sum(depths)
-        total_v += len(depths)
+        if len(num_colors) == p:
+            depths = [v.depth for v in ordering]
+            total_depths += sum(depths)
+            total_v += len(depths)
 
     print "Average depth in TDDs", float(total_depths) / total_v
     
