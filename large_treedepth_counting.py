@@ -49,6 +49,7 @@ def count_depths(G, H, coloring, p, td_lower):
     total_depths = 0
     total_v = 0
     for decomp in gen:
+        print decomp.root, len(decomp.vertexRecords)
         # create a post order traversal ordering with a DFS to use in the DP
         ordering = []
         q = deque([decomp.root])
@@ -60,8 +61,7 @@ def count_depths(G, H, coloring, p, td_lower):
             if not decomp.hasLeaf(curr):
                 q.extend(reversed(decomp.children(curr)))
         ordering.reverse()
-        num_colors = set(coloring[v] for v in q)
-        print num_colors
+        num_colors = set(coloring[v] for v in ordering)
 
         if len(num_colors) == p:
             depths = [v.depth for v in ordering]
