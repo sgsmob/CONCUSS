@@ -16,30 +16,35 @@ from lib.coloring.basic.check_tree_depth import check_tree_depth
 
 SILENT = True
 
+
 def recolor(cols, vertices, c):
     for v in vertices:
         cols[v] = c
 
+
 def independent_colors(G, c1, c2):
-    #for v in c1:
+    # for v in c1:
     #    if not G.neighbours(v).isdisjoint(c2):
     #        return False
-    #for v in c2:
+    # for v in c2:
     #    if not G.neighbours(v).isdisjoint(c1):
     #        return False
-    #return True
+    # return True
     return all(G.neighbours(v).isdisjoint(c2) for v in c1)
+
 
 def echo(*text):
     if not SILENT:
         print " ".join(map(str, text))
+
 
 def same_color(cols, vertices, c):
     for v in vertices:
         if cols[v] != c:
             return False
     return True
-    #return all(cols[v] == c for v in vertices)
+    # return all(cols[v] == c for v in vertices)
+
 
 def merge_colors(graph, cols, p):
     # order the coloring by frequency
@@ -61,8 +66,8 @@ def merge_colors(graph, cols, p):
             continue
         echo("\n", c1, c1_vertices)
         # otherwise iterate through all colors with fewer vertices
-        
-        for c2 in range(c1+1,num_colors):
+
+        for c2 in range(c1+1, num_colors):
             # vertices with color c2
             c2_vertices = color_sets[c2]
 
@@ -72,25 +77,25 @@ def merge_colors(graph, cols, p):
             echo("\t", c2, c2_vertices)
             # check whether c1 and c2 together form an independent set
             if independent_colors(graph, c1_vertices, c2_vertices):
-                 # temporarily color all c2 vertices with c1
-                 recolor(ordered_col, c2_vertices, c1)
-                 echo("\t\t",list(ordered_col[v] for v in c2_vertices))
-                 #assert same_color(ordered_col, c2_vertices, c1)
-                 #assert same_color(ordered_col, c1_vertices, c1)
-                 # check if merge would be p-centered
-                 is_p_centered, _ = check_tree_depth(graph, graph, ordered_col,
-                                                     p)
-                 echo("\t\t", is_p_centered, _)
-                 if is_p_centered:
-                     # merge the vertices of c2 into c1
-                     c1_vertices |= c2_vertices
-                     c2_vertices.clear()
-                     echo("\t\tNew c1:", c1_vertices)
-                 else:
-                     # restore the c2 vertices to their original color
-                     echo("\t\tNot", p+1, "centered")
-                     recolor(ordered_col, c2_vertices, c2)
-                     #assert same_color(ordered_col, c2_vertices, c2)
+                # temporarily color all c2 vertices with c1
+                recolor(ordered_col, c2_vertices, c1)
+                echo("\t\t", list(ordered_col[v] for v in c2_vertices))
+                # assert same_color(ordered_col, c2_vertices, c1)
+                # assert same_color(ordered_col, c1_vertices, c1)
+                # check if merge would be p-centered
+                is_p_centered, _ = check_tree_depth(graph, graph, ordered_col,
+                                                    p, required=c1)
+                echo("\t\t", is_p_centered, _)
+                if is_p_centered:
+                    # merge the vertices of c2 into c1
+                    c1_vertices |= c2_vertices
+                    c2_vertices.clear()
+                    echo("\t\tNew c1:", c1_vertices)
+                else:
+                    # restore the c2 vertices to their original color
+                    echo("\t\tNot", p+1, "centered")
+                    recolor(ordered_col, c2_vertices, c2)
+                    # assert same_color(ordered_col, c2_vertices, c2)
             else:
                 echo("\t\tDependent")
     # ensure the final coloring has no unused colors
@@ -104,7 +109,7 @@ def merge_colors(graph, cols, p):
         else:
             echo("skipped")
     return final_coloring
-    
+
 
 def write_coloring(cols, output):
     print "Writing result to {0}".format(output)
@@ -112,6 +117,7 @@ def write_coloring(cols, output):
     for v in cols:
         f.write(str(v)+': '+str(cols[v])+'\n')
     f.close()
+
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()

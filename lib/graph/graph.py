@@ -176,10 +176,11 @@ class Coloring(object):
                 return False
         return True
 
-    def normalize(self):
+    def normalize(self, mapping=False):
         """
         Normalize this coloring based on color frequency
-        :return: A normalized coloring
+        :return: A normalized coloring.  If mapping is true, also return the
+        map between the original coloring and this one.
         """
         res = Coloring()
         # Sort color by frequencies: most common colors get lower indices
@@ -191,7 +192,10 @@ class Coloring(object):
         for v in self.color:
             res[v] = indices[self.color[v]]
 
-        return res
+        if mapping:
+            return res, indices
+        else:
+            return res
 
     # For memoization
     def __str__(self):

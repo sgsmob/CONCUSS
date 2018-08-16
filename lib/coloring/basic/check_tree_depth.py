@@ -5,9 +5,7 @@
 # under the three-clause BSD license; see LICENSE.
 #
 
-
-
-from lib.util.recordtype import *
+from lib.util.recordtype import recordtype
 from lib.util.memorized import memorized
 from lib.util.misc import clear_output_line, percent_output
 import copy
@@ -193,9 +191,18 @@ def check_graph_center(g, col, data):
 
 
 # @memorized(['orig', 'col', 'treeDepth'])
-def check_tree_depth(orig, g, col, treeDepth, output=False):
-    col = col.normalize()
+def check_tree_depth(orig, g, oldcol, treeDepth, output=False, required=None):
+    col, mapping = oldcol.normalize(True)
     numColors = len(col)
+
+    if required is not None and required > 0:
+        req_alias = mapping[required]
+        assert req_alias < numColors
+        for v in g:
+            if col[v] == req_alias:
+                col[v] = 0
+            elif col[v] == 0:
+                col[v] = req_alias
 
     data = CtdData(
         responsible=set(),
@@ -218,7 +225,8 @@ def check_tree_depth(orig, g, col, treeDepth, output=False):
     # end for
 
     for v in g:
-        data.color[col[v]].number += 1
+        v_color = col[v]
+        data.color[v_color].number += 1
 
     sub = sum(1 if num == 1 else 0 for c, num in col.frequencies().items())
 
@@ -302,7 +310,11 @@ def check_tree_depth(orig, g, col, treeDepth, output=False):
                             # the combination consisted only of the maximal
                             # color all combinations are checked
                             finished = True
-
+                        elif required is not None and data.currentDepth == 0:
+                            # when we require a color to be in the set and we
+                            # hit depth 0, that means the required color (set
+                            # to 0) has been taken out, so we can stop
+                            finished = True
                         else:
                             # set 'lastColor' to the highest colors in the
                             # combi-set and erase also this color from the
