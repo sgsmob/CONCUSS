@@ -9,7 +9,7 @@ import sys
 from copy import copy
 
 from decomp_generator import DecompGenerator
-from lib.util.recordtype import *
+from lib.util.recordtype import recordtype
 from lib.graph.td_decomposition import TDDecomposition
 
 
@@ -107,9 +107,11 @@ class DFSSweep(DecompGenerator):
                 color added to combination
 
         """
+        print "Recursive walk {}, {}".format(colors, index_of_last)
         # Check to see if we are at p-1 colors, if so generate all combinations
         # with added pth color
         if len(data.colors_in_combi) == self.p - 1:
+            print "p-1 =", len(data.colors_in_combi), "colors"
             for color in colors[index_of_last + 1:]:
                 # Add color to stack
                 self.add(data, color)
@@ -135,6 +137,7 @@ class DFSSweep(DecompGenerator):
                 # Pop color from stack since we don't need it
                 self.remove(data, color)
         else:
+            print "p-1 >", len(data.colors_in_combi), "colors"
             # We need a separate last index for the recursive call
             # which will be incremented for each color we add
             last_index = index_of_last
@@ -236,7 +239,7 @@ class DFSSweep(DecompGenerator):
         :param color: The color we want to remove
 
         """
-
+        print "removing", color
         # Drop one level
         data.component_store.pop()
         # We are done processing 'color', so remove it
@@ -266,11 +269,11 @@ class DFSSweep(DecompGenerator):
             if elem == 0:
                 continue
             # This is a root, so make new dictionary entry for this root
-            elif elem % 2 != 0:                    
+            elif elem % 2 != 0:
                 # Flexible  comps[idx] = {idx}
                 if idx >= len(comps):
                     comps.extend([{x} for x in range(len(comps), idx)])
-                    comps.insert(idx,{idx})
+                    comps.insert(idx, {idx})
             # This is a child, find its root, and add to appropriate set
             else:
                 root = self.ufs_find(ufs, idx)
@@ -298,6 +301,8 @@ class DFSSweep(DecompGenerator):
         # Get the dictionary at the current depth
         comps_at_level = data.component_store[data.current_depth]
         # Iterate over its keys to get all components
+        print "Comps at level"
+        print comps_at_level
         for component in comps_at_level.itervalues():
             # Prune component if it has less than p vertices
             if not self.prune(component, self.multi_pat_min_p):
@@ -374,7 +379,7 @@ class DFSSweep(DecompGenerator):
                             ufs[d] = self.UFS_TYPE_CHILD | (a << 2)
 
                             # Move all of "d's" elements to "a"
-                            comps[a] |= comps[d]  
+                            comps[a] |= comps[d]
                             # Delete key since we don't need it anymore
                             del comps[d]
 
@@ -414,9 +419,9 @@ class DFSSweep(DecompGenerator):
                 if (component_color_freqs[self.coloring[some_vertex]] == 1):
                     # it is the center, so build tdDecomposition without making
                     # recursive calls
-                    decomp.update_parent_child(some_vertex, parent)
+                    decomp.update_parent_child(parent, some_vertex)
                     vertices.remove(some_vertex)
-                    decomp.update_parent_children(vertices, some_vertex)
+                    decomp.update_parent_children(some_vertex, vertices)
                 # not the center
                 else:
                     # delete entry in dictionary for the color of that vertex,
@@ -425,9 +430,9 @@ class DFSSweep(DecompGenerator):
                     # get that vertex to add to the decomposition
                     vertex = (colorClasses[component_color_freqs.keys()[0]] &
                               vertices).pop()
-                    decomp.update_parent_child(vertex, parent)
+                    decomp.update_parent_child(parent, vertex)
                     vertices.remove(vertex)
-                    decomp.update_parent_children(vertices, vertex)
+                    decomp.update_parent_children(vertex, vertices)
 
             else:
                 # find a center for this subtree
@@ -438,7 +443,7 @@ class DFSSweep(DecompGenerator):
                         nextVertices = vertices - remainingInColor
                         v = remainingInColor.pop()
                         # update parent/child relations
-                        decomp.update_parent_child(v, parent)
+                        decomp.update_parent_child(parent, v)
                         for comp in decomp.get_components(nextVertices):
                             # recursively build the decomposition in the
                             # subtrees

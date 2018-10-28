@@ -5,12 +5,11 @@
 #
 
 
-import sys
-import os
-import itertools
+import copy
+from collections import deque, defaultdict
 
-from lib.graph.graph import Graph, Coloring
-from lib.util.recordtype import *
+from lib.graph.graph import Graph
+from lib.util.recordtype import recordtype
 
 # Define a record type of information about the vertices
 # Attributes:
@@ -40,6 +39,11 @@ class TDDecomposition(Graph):
         self.root = None
         self.coloring = None
 
+    def __default_vertex_record(self, v):
+        return VertexInfo(parent=None,
+                          children=[],
+                          depth=None)
+
     @classmethod
     def fromSubgraph(cls, graph, vertices, coloring):
         """
@@ -65,20 +69,20 @@ class TDDecomposition(Graph):
         result.coloring = coloring
         return result
 
-    def update_parent_child(self, v, parent):
+    def update_parent_child(self, parent, v):
         """Sets parent to be parent of v and v to be the child of parent"""
         # print "\t\tupdating %s with parent %s"%(v, parent)
+        self.vertexRecords[v].parent = parent
         if parent is None:
             self.root = v
             self.vertexRecords[v].depth = 0
         else:
-            self.vertexRecords[v].parent = parent
             self.vertexRecords[parent].children.append(v)
             self.vertexRecords[v].depth = self.vertexRecords[parent].depth + 1
             if self.vertexRecords[v].depth + 1 > self.maxDepth:
                 self.maxDepth = self.vertexRecords[v].depth + 1
 
-    def update_parent_children(self, children, parent):
+    def update_parent_children(self, parent, children):
         """
         Sets the parent of all 'children' to 'parent'
         and updates the maxDepth if necessary
@@ -105,19 +109,18 @@ class TDDecomposition(Graph):
     def add_node(self, u):
         Graph.add_node(self, u)
         self.vertexRecords.extend(
-            [None for x in range(len(vertexRecords), u + 1)])
-        self.vertexRecords[u] = VertexInfo(parent=None, children=[],
-                                           depth=None)
+            [None for x in range(len(self.vertexRecords), u + 1)])
+        self.vertexRecords[u] = self.__default_vertex_record(u)
 
-    def add_nodes_from(self, u):
+    def add_nodes_from(self, U):
         """Adds an iterable of nodes at once to save time"""
-        Graph.add_nodes_from(self, u)
+        Graph.add_nodes_from(self, U)
         # Make a local reference to self.vertexRecords for use in the loop
         vertexRecords = self.vertexRecords
-        for n in u:
+        for u in U:
             self.vertexRecords.extend(
-                [None for x in range(len(vertexRecords), n + 1)])
-            vertexRecords[n] = VertexInfo(parent=None, children=[], depth=None)
+                [None for x in range(len(vertexRecords), u + 1)])
+            vertexRecords[u] = self.__default_vertex_record(u)
 
     def depth(self, v=None):
         """

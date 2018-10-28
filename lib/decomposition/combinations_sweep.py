@@ -105,9 +105,9 @@ class CombinationsSweep(DecompGenerator):
                 if (component_color_freqs[self.coloring[some_vertex]] == 1):
                     # It is the center, so build tdDecomposition without making
                     # recursive calls
-                    decomp.update_parent_child(some_vertex, parent)
+                    decomp.update_parent_child(parent, some_vertex)
                     vertices.remove(some_vertex)
-                    decomp.update_parent_children(vertices, some_vertex)
+                    decomp.update_parent_children(some_vertex, vertices)
                 # Not the center
                 else:
                     # Delete entry in dictionary for the color of that vertex,
@@ -117,11 +117,11 @@ class CombinationsSweep(DecompGenerator):
                     vertex = (colorClasses[component_color_freqs.keys()[0]] &
                               vertices).pop()
                     # Build tdDecomposition without making recursive calls
-                    decomp.update_parent_child(vertex, parent)
+                    decomp.update_parent_child(parent, vertex)
                     # Remove the vertex so that we can add the rest of the
                     # vertices as its children in the TDD
                     vertices.remove(vertex)
-                    decomp.update_parent_children(vertices, vertex)
+                    decomp.update_parent_children(vertex, vertices)
 
             else:
                 # Find a center for this subtree
@@ -134,7 +134,7 @@ class CombinationsSweep(DecompGenerator):
                         nextVertices = vertices - remainingInColor
                         v = remainingInColor.pop()
                         # Update parent/child relations
-                        decomp.update_parent_child(v, parent)
+                        decomp.update_parent_child(parent, v)
                         for comp in self.G.get_components(nextVertices):
                             # Recursively build the decomposition in the
                             # subtrees

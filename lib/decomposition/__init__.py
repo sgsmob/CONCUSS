@@ -8,3 +8,4 @@
 from dfs_sweep import DFSSweep
 from combinations_sweep import CombinationsSweep
 from decomp_generator import DecompGenerator
+from save_tdd_dfs_sweep import SaveTDDDFSSweep

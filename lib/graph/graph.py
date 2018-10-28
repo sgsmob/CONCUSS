@@ -265,10 +265,12 @@ class Graph(object):
     def add_node(self, u):
         """ Add a node to the graph """
         self.nodes.add(u)
+        self.adj.extend([set() for x in range(len(self.adj), u + 1)])
 
     def add_nodes_from(self, u):
         """ Add multiple nodes to the graph """
         self.nodes.update(u)
+        self.adj.extend([set() for x in range(len(self.adj), max(u) + 1)])
 
     def add_edge(self, u, v):
         """
@@ -353,6 +355,8 @@ class Graph(object):
         :param u: The vertex
         :return: The degree of the vertex
         """
+        if len(self.adj) < u-1:
+            print self.adj
         return len(self.adj[u])
 
     def degree_sequence(self):
